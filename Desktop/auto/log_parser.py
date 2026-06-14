@@ -26,5 +26,27 @@ def parse_log(filename, threshold=3):
     
     if not found:
         print("    None found.")
+def check_brute_force(filename, failed_threshold=3):
+    print(f"\n[!] Scanning {filename} for Brute Force attempts...")
+    failed_logins = Counter()
+
+    log_pattern = re.compile(r'(\d+\.\d+\.\d+\.\d+).*?"\s+401\b')
+    with open(filename, "r") as f:
+        for line in f:
+            match = log_pattern.search(line)
+            if match:
+                ip = match.group(1)
+                failed_logins[ip] += 1
+    print(f"[BRUTE FORCE ALERT] IPs with {failed_threshold} or more failed logins:")
+    found = False
+    for ip, count in failed_logins.items():
+        if count >= failed_threshold:
+            print(f"    [CRITICAL] {ip} — {count} failed login attempts")
+            found = True
+            
+    if not found:
+        print("    None found.")
+
 
 parse_log("sample.log")
+check_brute_force("sample.log")
